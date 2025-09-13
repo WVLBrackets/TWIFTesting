@@ -1,0 +1,62 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "TWIF About" [ref=e8] [cursor=pointer]:
+        - /url: /about
+        - img "The Week In Fantasy™" [ref=e9] [cursor=pointer]
+      - generic [ref=e10]:
+        - link "Home" [ref=e11] [cursor=pointer]:
+          - /url: /
+          - img [ref=e12] [cursor=pointer]
+          - text: Home
+        - link "Login or Signup" [ref=e14] [cursor=pointer]:
+          - /url: /auth
+          - generic [ref=e15] [cursor=pointer]:
+            - img [ref=e16] [cursor=pointer]
+            - text: Login/Signup
+  - main [ref=e18]:
+    - generic [ref=e21]:
+      - img "TWIF Logo" [ref=e23]
+      - heading "Login to Your Account" [level=2] [ref=e24]
+      - generic [ref=e25]:
+        - generic [ref=e26]:
+          - generic [ref=e28]: Email address
+          - textbox "you@example.com" [ref=e29]: thewarren@gmail.com
+        - generic [ref=e30]:
+          - generic [ref=e31]:
+            - generic [ref=e32]: Password
+            - button "Password" [ref=e33] [cursor=pointer]: Forgot password?
+          - generic [ref=e34]:
+            - textbox "••••••••" [ref=e35]: "!Toyota123"
+            - button "Show password" [ref=e36] [cursor=pointer]:
+              - img [ref=e37] [cursor=pointer]
+        - button "Login" [ref=e41] [cursor=pointer]
+      - button "Don't have an account? Sign Up" [ref=e43] [cursor=pointer]
+      - generic [ref=e44]: OR
+      - button "Google icon Continue with Google" [ref=e46] [cursor=pointer]:
+        - img "Google icon" [ref=e47] [cursor=pointer]
+        - text: Continue with Google
+      - generic [ref=e48]:
+        - link "Terms of Service" [ref=e49] [cursor=pointer]:
+          - /url: /terms
+        - generic [ref=e50]: "|"
+        - link "Privacy Policy" [ref=e51] [cursor=pointer]:
+          - /url: /privacy
+  - generic [ref=e53]:
+    - heading "Your Privacy Choices" [level=3] [ref=e54]
+    - paragraph [ref=e55]:
+      - text: We use cookies and similar technologies to enhance your Browse experience, personalize content and ads, analyze traffic, and ensure security. By clicking "Accept All", you consent to our use of these technologies. You can change your preferences at any time. For more information, please see our
+      - link "Privacy Policy" [ref=e56] [cursor=pointer]:
+        - /url: /privacy
+      - text: and
+      - link "Cookie Policy" [ref=e57] [cursor=pointer]:
+        - /url: /terms
+      - text: .
+    - generic [ref=e58]:
+      - button "Customize" [ref=e59] [cursor=pointer]
+      - button "Necessary Only" [ref=e60] [cursor=pointer]
+      - button "Accept All" [ref=e61] [cursor=pointer]
+```

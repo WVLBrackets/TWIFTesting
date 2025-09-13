@@ -1,0 +1,29 @@
+{
+  "name": "twiftesting",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WVLBrackets/TWIFTesting.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/WVLBrackets/TWIFTesting/issues"
+  },
+  "homepage": "https://github.com/WVLBrackets/TWIFTesting#readme",
+  "dependencies": {
+    "csv-parser": "^3.2.0",
+    "dotenv": "^17.2.2",
+    "fs-extra": "^11.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0"
+  }
+}
