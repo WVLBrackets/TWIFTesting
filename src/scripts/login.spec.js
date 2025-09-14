@@ -2,61 +2,92 @@ import { test, expect } from '@playwright/test';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-test('login and verify landing page', async ({ page }) => {
-  // --- NAVIGATE TO LOGIN PAGE ---
-  await page.goto(process.env.TWIF_URL);
+const COOKIE_MODE = process.env.COOKIE_MODE || 'accept';
+const TIMEOUT_MS = parseInt(process.env.TIMEOUT_MS || '10000', 10);
 
-  // --- LOGIN STEPS (DO NOT CHANGE) ---
-  const emailInput = page.locator('input[placeholder="you@example.com"]');
-  const passwordInput = page.locator('input[placeholder="••••••••"]');
-  const loginButton = page.locator('button[type="submit"]');
+test.describe('TWIF login tests', () => {
 
-  // Fill in credentials
-  await emailInput.fill(process.env.TWIF_USERNAME);
-  await passwordInput.fill(process.env.TWIF_PASSWORD);
+  test.afterEach(async ({ page }, testInfo) => {
+    if (testInfo.status !== testInfo.expectedStatus) {
+      // Test failed
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const screenshotPath = `screenshots/failure-${timestamp}.png`;
+      const htmlPath = `screenshots/failure-${timestamp}.html`;
 
-  // Wait for the button to be visible AND enabled
-  await expect(loginButton).toBeVisible({ timeout: 15000 });
-  await expect(loginButton).toBeEnabled({ timeout: 15000 });
+      await page.screenshot({ path: screenshotPath, fullPage: true });
+      await page.content().then(html => require('fs').writeFileSync(htmlPath, html));
 
-  // Extra safeguard: scroll into view
-  await loginButton.scrollIntoViewIfNeeded();
+      console.log(`Test failed. Screenshot saved to: ${screenshotPath}`);
+      console.log(`Test failed. HTML saved to: ${htmlPath}`);
+    }
+  });
 
-  // Click using Playwright's robust click
-  await loginButton.click({ force: true, timeout: 15000 });
+  test('login and verify landing page', async ({ page }) => {
+    // --- NAVIGATE TO LOGIN PAGE ---
+    await page.goto(process.env.TWIF_URL);
 
-  // --- SPA-AWARE LANDING PAGE WAIT ---
-// Wait for the container that wraps all post-login nav links
-const navContainer = page.locator('div.flex.items-center.gap-1.flex-shrink-0');
+    // --- HANDLE COOKIE BANNER ---
+    try {
+      console.log('Checking for cookie banner...');
+      const bannerHeading = page.getByRole('heading', { name: 'Your Privacy Choices' });
+      await bannerHeading.waitFor({ state: 'visible', timeout: TIMEOUT_MS });
 
-// Wait until the container is attached to DOM
-await navContainer.waitFor({ state: 'attached', timeout: 15000 });
+      let buttonName = COOKIE_MODE === 'accept' ? 'Accept All' : 'Necessary Only';
+      console.log(`Cookie banner detected, clicking "${buttonName}"...`);
+      await page.getByRole('button', { name: new RegExp(buttonName, 'i') }).click();
+      console.log('Clicked cookie banner button.');
+    } catch (err) {
+      console.log('No cookie banner found (already dismissed or not shown). Continuing...');
+    }
 
-// Optionally: wait until it has at least one visible child
-await page.waitForFunction(() => {
-  const container = document.querySelector('div.flex.items-center.gap-1.flex-shrink-0');
-  if (!container) return false;
-  return Array.from(container.children).some(el => el.offsetParent !== null);
-}, { timeout: 15000 });
+    // --- LOGIN STEPS (DO NOT CHANGE) ---
+    const emailInput = page.locator('input[placeholder="you@example.com"]');
+    const passwordInput = page.locator('input[placeholder="••••••••"]');
+    const loginButton = page.locator('button[type="submit"]');
 
-// --- After successful login ---
+    await emailInput.fill(process.env.TWIF_USERNAME);
+    await passwordInput.fill(process.env.TWIF_PASSWORD);
 
-// Wait for any of the post-login indicators to appear
-const postLoginSelector = [
-  'a[title="Your Teams and Profile"]', // user page
-  'a[title="Dashboard"]',              // dashboard page
-  'a[title="Compare Players"]'         // compare page
-].join(',');
+    await expect(loginButton).toBeVisible({ timeout: TIMEOUT_MS });
+    await expect(loginButton).toBeEnabled({ timeout: TIMEOUT_MS });
 
-// --- Wait for logout button to appear ---
-const logoutButton = page.locator('button[aria-label="Logout"]');
+    await loginButton.scrollIntoViewIfNeeded();
+    await loginButton.click({ force: true, timeout: TIMEOUT_MS });
+    console.log('Clicked login button.');
 
-// Wait until the button is visible and enabled
-await expect(logoutButton).toBeVisible({ timeout: 30000 });
-await expect(logoutButton).toBeEnabled({ timeout: 15000 });
+    // --- WAIT FOR POST-LOGIN INDICATORS ---
+    const postLoginSelector = [
+      'a[title="Your Teams and Profile"]:not(.md\\:hidden)',
+      'a[title="Dashboard"]:not(.md\\:hidden)',
+      'a[title="Compare Players"]:not(.md\\:hidden)'
+    ].join(',');
 
-// Click it using robust Playwright options
-await logoutButton.click({ force: true });
+    const postLoginLocators = page.locator(postLoginSelector);
 
+    console.log('Waiting for post-login indicator...');
+    await postLoginLocators.first().waitFor({ state: 'visible', timeout: TIMEOUT_MS });
+
+    const count = await postLoginLocators.count();
+    console.log(`Found ${count} matching post-login elements:`);
+    for (let i = 0; i < count; i++) {
+      const text = await postLoginLocators.nth(i).innerText().catch(() => 'N/A');
+      const href = await postLoginLocators.nth(i).getAttribute('href').catch(() => 'N/A');
+      console.log(`  [${i}] text="${text}", href="${href}"`);
+    }
+
+    // --- WAIT FOR LOGOUT BUTTON ---
+    const logoutButton = page.locator('button[aria-label="Logout"]');
+    console.log('Waiting for logout button...');
+
+    await expect(logoutButton).toBeVisible({ timeout: TIMEOUT_MS });
+    await expect(logoutButton).toBeEnabled({ timeout: TIMEOUT_MS });
+
+    const logoutText = await logoutButton.innerText().catch(() => 'N/A');
+    console.log(`Logout button found. Text="${logoutText}"`);
+
+    // --- CLICK LOGOUT ---
+    await logoutButton.click({ force: true });
+    console.log('Clicked logout button.');
+  });
 
 });
